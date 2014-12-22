@@ -34,16 +34,16 @@ from openerp.tools.translate import _
 ADDRESS_FORMAT_LAYOUTS = {
     '%(city)s %(state_code)s\n%(zip)s': """
         <div class="address_format">
-            <field name="city" placeholder="City" style="width: 50%%"/>
-            <field name="state_id" class="oe_no_button" placeholder="State" style="width: 47%%" options='{"no_open": true}'/>
+            <field name="city" placeholder="City" style="width: 50%"/>
+            <field name="state_id" class="oe_no_button" placeholder="State" style="width: 47%" options='{"no_open": true}'/>
             <br/>
             <field name="zip" placeholder="ZIP"/>
         </div>
     """,
     '%(zip)s %(city)s': """
         <div class="address_format">
-            <field name="zip" placeholder="ZIP" style="width: 40%%"/>
-            <field name="city" placeholder="City" style="width: 57%%"/>
+            <field name="zip" placeholder="ZIP" style="width: 40%"/>
+            <field name="city" placeholder="City" style="width: 57%"/>
             <br/>
             <field name="state_id" class="oe_no_button" placeholder="State" options='{"no_open": true}'/>
         </div>
@@ -416,16 +416,16 @@ class res_partner(osv.Model, format_address):
     def _update_fields_values(self, cr, uid, partner, fields, context=None):
         """ Returns dict of write() values for synchronizing ``fields`` """
         values = {}
-        for field in fields:
-            column = self._all_columns[field].column
-            if column._type == 'one2many':
+        for fname in fields:
+            field = self._fields[fname]
+            if field.type == 'one2many':
                 raise AssertionError('One2Many fields cannot be synchronized as part of `commercial_fields` or `address fields`')
-            if column._type == 'many2one':
-                values[field] = partner[field].id if partner[field] else False
-            elif column._type == 'many2many':
-                values[field] = [(6,0,[r.id for r in partner[field] or []])]
+            if field.type == 'many2one':
+                values[fname] = partner[fname].id if partner[fname] else False
+            elif field.type == 'many2many':
+                values[fname] = [(6,0,[r.id for r in partner[fname] or []])]
             else:
-                values[field] = partner[field]
+                values[fname] = partner[fname]
         return values
 
     def _address_fields(self, cr, uid, context=None):
@@ -445,7 +445,7 @@ class res_partner(osv.Model, format_address):
         partners that aren't `commercial entities` themselves, and will be
         delegated to the parent `commercial entity`. The list is meant to be
         extended by inheriting classes. """
-        return ['vat']
+        return ['vat', 'credit_limit']
 
     def _commercial_sync_from_company(self, cr, uid, partner, context=None):
         """ Handle sync of commercial fields when a new parent commercial entity is set,
@@ -523,6 +523,14 @@ class res_partner(osv.Model, format_address):
             parent.update_address(addr_vals)
             if not parent.is_company:
                 parent.write({'is_company': True})
+
+    def unlink(self, cr, uid, ids, context=None):
+        orphan_contact_ids = self.search(cr, uid,
+            [('parent_id', 'in', ids), ('id', 'not in', ids), ('use_parent_address', '=', True)], context=context)
+        if orphan_contact_ids:
+            # no longer have a parent address
+            self.write(cr, uid, orphan_contact_ids, {'use_parent_address': False}, context=context)
+        return super(res_partner, self).unlink(cr, uid, ids, context=context)
 
     def _clean_website(self, website):
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse(website)
