@@ -1028,9 +1028,9 @@ class stock_picking(osv.osv):
         product_uom = {} # Determines UoM used in pack operations
         for move in picking.move_lines:
             if not product_uom.get(move.product_id.id):
-                product_uom[move.product_id.id] = move.product_id.uom_id.id
-            if move.product_uom.id != move.product_id.uom_id.id and move.product_uom.factor > product_uom[move.product_id.id]:
-                product_uom[move.product_id.id] = move.product_uom.id
+                product_uom[move.product_id.id] = move.product_id.uom_id
+            if move.product_uom.id != move.product_id.uom_id.id and move.product_uom.factor > product_uom[move.product_id.id].factor:
+                product_uom[move.product_id.id] = move.product_uom
 
         pack_obj = self.pool.get("stock.quant.package")
         quant_obj = self.pool.get("stock.quant")
@@ -1088,7 +1088,7 @@ class stock_picking(osv.osv):
             uom_id = product.uom_id.id
             qty_uom = qty
             if product_uom.get(key[0]):
-                uom_id = product_uom[key[0]]
+                uom_id = product_uom[key[0]].id
                 qty_uom = uom_obj._compute_qty(cr, uid, product.uom_id.id, qty, uom_id)
             vals.append({
                 'picking_id': picking.id,
@@ -1789,8 +1789,7 @@ class stock_move(osv.osv):
         return False
 
     def _default_destination_address(self, cr, uid, context=None):
-        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
-        return user.company_id.partner_id.id
+        return False
 
     _defaults = {
         'location_id': _default_location_source,
