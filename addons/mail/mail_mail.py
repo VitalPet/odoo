@@ -179,7 +179,10 @@ class mail_mail(osv.Model):
             related_user = partner.user_ids[0]
             try:
                 self.pool.get(mail.model).check_access_rule(cr, related_user.id, [mail.res_id], 'read', context=context)
-                base_url = self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.base.url')
+            except except_orm, e:
+                pass
+            else:
+                base_url = self.pool.get('ir.config_parameter').get_param(cr, SUPERUSER_ID, 'web.base.url')
                 # the parameters to encode for the query and fragment part of url
                 query = {'db': cr.dbname}
                 fragment = {
@@ -190,8 +193,6 @@ class mail_mail(osv.Model):
                 url = urljoin(base_url, "?%s#%s" % (urlencode(query), urlencode(fragment)))
                 text = _("""<p>Access this document <a href="%s">directly in OpenERP</a></p>""") % url
                 body = tools.append_content_to_html(body, ("<div><p>%s</p></div>" % text), plaintext=False)
-            except except_orm, e:
-                pass
         return body
 
     def send_get_mail_reply_to(self, cr, uid, mail, partner=None, context=None):
@@ -305,8 +306,23 @@ class mail_mail(osv.Model):
                         object_id = mail.res_id and ('%s-%s' % (mail.res_id, mail.model)),
                         subtype = 'html',
                         subtype_alternative = 'plain')
-                    res = ir_mail_server.send_email(cr, uid, msg,
-                        mail_server_id=mail.mail_server_id.id, context=context)
+                    try:
+                        res = ir_mail_server.send_email(
+                            cr, uid,
+                            msg,
+                            mail_server_id=mail.mail_server_id.id,
+                            context=context
+                        )
+                    except AssertionError as error:
+                        if error.message == ir_mail_server.NO_VALID_RECIPIENT:
+                            # No valid recipient found for this particular
+                            # mail item -> ignore error to avoid blocking
+                            # delivery to next recipients, if any. If this is
+                            # the only recipient, the mail will show as failed.
+                            _logger.warning("Ignoring invalid recipients for mail.mail %s: %s",
+                                            mail.message_id, email.get('email_to'))
+                        else:
+                            raise
                 if res:
                     mail.write({'state': 'sent', 'message_id': res})
                     mail_sent = True

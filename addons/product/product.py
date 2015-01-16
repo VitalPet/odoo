@@ -152,6 +152,7 @@ class product_uom(osv.osv):
     _defaults = {
         'active': 1,
         'rounding': 0.01,
+        'factor': 1,
         'uom_type': 'reference',
     }
 
@@ -177,10 +178,7 @@ class product_uom(osv.osv):
                 raise osv.except_osv(_('Error!'), _('Conversion from Product UoM %s to Default UoM %s is not possible as they both belong to different Category!.') % (from_unit.name,to_unit.name,))
             else:
                 return qty
-        # First round to the precision of the original unit, so that
-        # float representation errors do not bias the following ceil()
-        # e.g. with 1 / (1/12) we could get 12.0000048, ceiling to 13! 
-        amount = float_round(qty/from_unit.factor, precision_rounding=from_unit.rounding)
+        amount = qty/from_unit.factor
         if to_unit:
             amount = ceiling(amount * to_unit.factor, to_unit.rounding)
         return amount
@@ -532,6 +530,10 @@ class product_product(osv.osv):
     def _set_image(self, cr, uid, id, name, value, args, context=None):
         return self.write(cr, uid, [id], {'image': tools.image_resize_image_big(value)}, context=context)
 
+    def _get_name_template_ids(self, cr, uid, ids, context=None):
+        template_ids = self.pool.get('product.product').search(cr, uid, [('product_tmpl_id', 'in', ids)])
+        return list(set(template_ids))
+
     _defaults = {
         'active': lambda *a: 1,
         'price_extra': lambda *a: 0.0,
@@ -563,7 +565,11 @@ class product_product(osv.osv):
         'price_extra': fields.float('Variant Price Extra', digits_compute=dp.get_precision('Product Price')),
         'price_margin': fields.float('Variant Price Margin', digits_compute=dp.get_precision('Product Price')),
         'pricelist_id': fields.dummy(string='Pricelist', relation='product.pricelist', type='many2one'),
-        'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', size=128, store=True, select=True),
+        'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', size=128, store={
+            'product.template': (_get_name_template_ids, ['name'], 10),
+            'product.product': (lambda self, cr, uid, ids, c=None: ids, ['product_tmpl_id'], 10),
+
+            }, select=True),
         'color': fields.integer('Color Index'),
         # image: all image fields are base64 encoded and PIL-supported
         'image': fields.binary("Image",
@@ -691,7 +697,7 @@ class product_product(osv.osv):
                 ids.update(self.search(cr, user, args + [('default_code',operator,name)], limit=limit, context=context))
                 if not limit or len(ids) < limit:
                     # we may underrun the limit because of dupes in the results, that's fine
-                    ids.update(self.search(cr, user, args + [('name',operator,name)], limit=(limit and (limit-len(ids)) or False) , context=context))
+                    ids.update(self.search(cr, user, args + [('name',operator,name), ('id', 'not in', list(ids))], limit=(limit and (limit-len(ids)) or False) , context=context))
                 ids = list(ids)
             elif not ids and operator in expression.NEGATIVE_TERM_OPERATORS:
                 ids = self.search(cr, user, args + ['&', ('default_code', operator, name), ('name', operator, name)], limit=limit, context=context)
@@ -719,7 +725,8 @@ class product_product(osv.osv):
 
         res = {}
         product_uom_obj = self.pool.get('product.uom')
-        for product in self.browse(cr, SUPERUSER_ID, ids, context=context):
+        company_id = self.pool['res.users'].read(cr, uid, uid, ['company_id'], context=context)['company_id'][0]
+        for product in self.browse(cr, SUPERUSER_ID, ids, context=dict(context, force_company=company_id)):
             res[product.id] = product[ptype] or 0.0
             if ptype == 'list_price':
                 res[product.id] = (res[product.id] * (product.price_margin or 1.0)) + \
@@ -769,6 +776,34 @@ class product_product(osv.osv):
         if context and context.get('search_default_categ_id', False):
             args.append((('categ_id', 'child_of', context['search_default_categ_id'])))
         return super(product_product, self).search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=count)
+
+    def _compute_uos_qty(self, cr, uid, ids, uom, qty, uos, context=None):
+        '''
+        Computes product's invoicing quantity in UoS from quantity in UoM.
+        Takes into account the
+        :param uom: Source unit
+        :param qty: Source quantity
+        :param uos: Target UoS unit.
+        '''
+        if not uom or not qty or not uos:
+            return qty
+        uom_obj = self.pool['product.uom']
+        product_id = ids[0] if isinstance(ids, (list, tuple)) else ids
+        product = self.browse(cr, uid, product_id, context=context)
+        if isinstance(uos, (int, long)):
+            uos = uom_obj.browse(cr, uid, uos, context=context)
+        if isinstance(uom, (int, long)):
+            uom = uom_obj.browse(cr, uid, uom, context=context)
+        if product.uos_id:  # Product has UoS defined
+            # We cannot convert directly between units even if the units are of the same category
+            # as we need to apply the conversion coefficient which is valid only between quantities
+            # in product's default UoM/UoS
+            qty_default_uom = uom_obj._compute_qty_obj(cr, uid, uom, qty, product.uom_id)  # qty in product's default UoM
+            qty_default_uos = qty_default_uom * product.uos_coeff
+            return uom_obj._compute_qty_obj(cr, uid, product.uos_id, qty_default_uos, uos)
+        else:
+            return uom_obj._compute_qty_obj(cr, uid, uom, qty, uos)
+
 
 product_product()
 

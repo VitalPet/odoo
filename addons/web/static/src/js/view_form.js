@@ -1165,7 +1165,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
     },
     build_eval_context: function() {
         var a_dataset = this.dataset;
-        return new instance.web.CompoundContext(a_dataset.get_context(), this._build_view_fields_values());
+        return new instance.web.CompoundContext(this._build_view_fields_values(), a_dataset.get_context());
     },
 });
 
@@ -3094,7 +3094,7 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
     reinit_value: function(val) {
         this.internal_set_value(val);
         this.floating = false;
-        if (this.is_started)
+        if (this.is_started && !this.no_rerender)
             this.render_value();
     },
     initialize_field: function() {
@@ -3328,7 +3328,7 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
         }
         if (! no_recurse) {
             var dataset = new instance.web.DataSetStatic(this, this.field.relation, self.build_context());
-            this.alive(dataset.name_get([self.get("value")])).done(function(data) {
+            var def = this.alive(dataset.name_get([self.get("value")])).done(function(data) {
                 if (!data[0]) {
                     self.do_warn(_t("Render"), _t("No value found for the field "+self.field.string+" for value "+self.get("value")));
                     return;
@@ -3336,6 +3336,9 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
                 self.display_value["" + self.get("value")] = data[0][1];
                 self.render_value(true);
             });
+            if (this.view && this.view.render_value_defs){
+                this.view.render_value_defs.push(def);
+            }
         }
     },
     display_string: function(str) {
@@ -3540,16 +3543,18 @@ instance.web.form.FieldOne2Many = instance.web.form.AbstractField.extend({
         var self = this;
 
         self.load_views();
-        this.is_loaded.done(function() {
-            self.on("change:effective_readonly", self, function() {
-                self.is_loaded = self.is_loaded.then(function() {
-                    self.viewmanager.destroy();
-                    return $.when(self.load_views()).done(function() {
-                        self.reload_current_view();
-                    });
+        var destroy = function() {
+            self.is_loaded = self.is_loaded.then(function() {
+                self.viewmanager.destroy();
+                return $.when(self.load_views()).done(function() {
+                    self.reload_current_view();
                 });
             });
+        };
+        this.is_loaded.done(function() {
+            self.on("change:effective_readonly", self, destroy);
         });
+        this.view.on("on_button_cancel", self, destroy);
         this.is_started = true;
         this.reload_current_view();
     },
@@ -3739,7 +3744,7 @@ instance.web.form.FieldOne2Many = instance.web.form.AbstractField.extend({
             this.dataset.index = 0;
         }
         this.trigger_on_change();
-        if (this.is_started) {
+        if (this.is_started && !this.no_rerender) {
             return self.reload_current_view();
         } else {
             return $.when();
@@ -3881,28 +3886,37 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
         this.o2m.trigger_on_change();
     },
     is_valid: function () {
-        var editor = this.editor;
-        var form = editor.form;
-        // If no edition is pending, the listview can not be invalid (?)
-        if (!editor.record) {
-            return true
-        }
-        // If the form has not been modified, the view can only be valid
-        // NB: is_dirty will also be set on defaults/onchanges/whatever?
-        // oe_form_dirty seems to only be set on actual user actions
-        if (!form.$el.is('.oe_form_dirty')) {
+        var self = this;
+        if (!this.fields_view || !this.editable()){
             return true;
         }
-        this.o2m._dirty_flag = true;
-
-        // Otherwise validate internal form
-        return _(form.fields).chain()
-            .invoke(function () {
-                this._check_css_flags();
-                return this.is_valid();
-            })
-            .all(_.identity)
-            .value();
+        var r;
+        if (_.isEmpty(this.records.records)){
+            return true;
+        }
+        current_values = {};
+        _.each(this.editor.form.fields, function(field){
+            field._inhibit_on_change_flag = true;
+            field.no_rerender = true;
+            current_values[field.name] = field.get('value');
+        });
+        var valid = _.every(this.records.records, function(record){
+            r = record;
+            _.each(self.editor.form.fields, function(field){
+                field.set_value(r.attributes[field.name]);
+            });
+            return _.every(self.editor.form.fields, function(field){
+                field.process_modifiers();
+                field._check_css_flags();
+                return field.is_valid();
+            });
+        });
+        _.each(this.editor.form.fields, function(field){
+            field.set('value', current_values[field.name]);
+            field._inhibit_on_change_flag = false;
+            field.no_rerender = false;
+        });
+        return valid;
     },
     do_add_record: function () {
         if (this.editable()) {
@@ -5225,7 +5239,7 @@ instance.web.form.FieldBinaryImage = instance.web.form.FieldBinary.extend({
  * Options on attribute ; "blockui" {Boolean} block the UI or not
  * during the file is uploading
  */
-instance.web.form.FieldMany2ManyBinaryMultiFiles = instance.web.form.AbstractField.extend({
+instance.web.form.FieldMany2ManyBinaryMultiFiles = instance.web.form.AbstractField.extend(instance.web.form.ReinitializeFieldMixin, {
     template: "FieldBinaryFileUploader",
     init: function(field_manager, node) {
         this._super(field_manager, node);
@@ -5238,8 +5252,7 @@ instance.web.form.FieldMany2ManyBinaryMultiFiles = instance.web.form.AbstractFie
         this.fileupload_id = _.uniqueId('oe_fileupload_temp');
         $(window).on(this.fileupload_id, _.bind(this.on_file_loaded, this));
     },
-    start: function() {
-        this._super(this);
+    initialize_content: function() {
         this.$el.on('change', 'input.oe_form_binary_file', this.on_file_change );
     },
     set_value: function(value_) {
