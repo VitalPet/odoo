@@ -1309,7 +1309,7 @@ class Binary(openerpweb.Controller):
         if filename_field:
             fields.append(filename_field)
         if data:
-            res = { field: data }
+            res = {field: data, filename_field: jdata.get('filename', None)}
         elif id:
             res = Model.read([int(id)], fields, context)[0]
         else:
@@ -1481,7 +1481,7 @@ class Export(openerpweb.Controller):
             fields['.id'] = fields.pop('id', {'string': 'ID'})
 
         fields_sequence = sorted(fields.iteritems(),
-            key=lambda field: field[1].get('string', ''))
+            key=lambda field: openerp.tools.ustr(field[1].get('string', '')))
 
         records = []
         for field_name, field in fields_sequence:
