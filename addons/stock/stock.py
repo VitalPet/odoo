@@ -642,7 +642,7 @@ class stock_picking(osv.osv):
         'origin': fields.char('Source Document', size=64, states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}, help="Reference of the document", select=True),
         'backorder_id': fields.many2one('stock.picking', 'Back Order of', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}, help="If this shipment was split, then this field links to the shipment which contains the already processed part.", select=True),
         'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal')], 'Shipping Type', required=True, select=True, help="Shipping type specify, goods coming in or going out."),
-        'note': fields.text('Notes', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
+        'note': fields.text('Notes'),
         'stock_journal_id': fields.many2one('stock.journal','Stock Journal', select=True, states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
         'location_id': fields.many2one('stock.location', 'Location', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}, help="Keep empty if you produce at the location where the finished products are needed." \
                 "Set a location if you produce at a fixed location. This can be a partner location " \
@@ -725,6 +725,7 @@ class stock_picking(osv.osv):
             default.setdefault('backorder_id', False)
         if 'invoice_state' not in default and picking_obj.invoice_state == 'invoiced':
             default['invoice_state'] = '2binvoiced'
+        default.setdefault('date_done', False)
         res = super(stock_picking, self).copy(cr, uid, id, default, context)
         return res
 
@@ -2060,17 +2061,20 @@ class stock_move(osv.osv):
             for todo in moves_by_type.values():
                 ptype = todo[0][1][5] and todo[0][1][5] or location_obj.picking_type_get(cr, uid, todo[0][0].location_dest_id, todo[0][1][0])
                 if picking:
+                    # Need to check name of old picking because it always considers picking as "OUT" when created from Sales Order
+                    old_ptype = location_obj.picking_type_get(cr, uid, picking.move_lines[0].location_id, picking.move_lines[0].location_dest_id)
+                    if old_ptype != picking.type:
+                        if old_ptype == 'internal':
+                            old_pick_name = seq_obj.get(cr, uid, 'stock.picking')
+                        else:
+                            old_pick_name = seq_obj.get(cr, uid, 'stock.picking.' + old_ptype)
+                        self.pool.get('stock.picking').write(cr, uid, [picking.id], {'name': old_pick_name, 'type': old_ptype}, context=context)
                     # name of new picking according to its type
                     if ptype == 'internal':
                         new_pick_name = seq_obj.get(cr, uid,'stock.picking')
                     else :
                         new_pick_name = seq_obj.get(cr, uid, 'stock.picking.' + ptype)
                     pickid = self._create_chained_picking(cr, uid, new_pick_name, picking, ptype, todo, context=context)
-                    # Need to check name of old picking because it always considers picking as "OUT" when created from Sales Order
-                    old_ptype = location_obj.picking_type_get(cr, uid, picking.move_lines[0].location_id, picking.move_lines[0].location_dest_id)
-                    if old_ptype != picking.type:
-                        old_pick_name = seq_obj.get(cr, uid, 'stock.picking.' + old_ptype)
-                        self.pool.get('stock.picking').write(cr, uid, [picking.id], {'name': old_pick_name, 'type': old_ptype}, context=context)
                 else:
                     pickid = False
                 for move, (loc, dummy, delay, dummy, company_id, ptype, invoice_state) in todo:
@@ -2350,7 +2354,11 @@ class stock_move(osv.osv):
                     new_std_price = new_price
                 else:
                     # Get the standard price
-                    amount_unit = product.price_get('standard_price', context=context)[product.id]
+                    pricetype_obj = self.pool.get('product.price.type')
+                    price_type_id = pricetype_obj.search(cr, uid, [('field','=','standard_price')])[0]
+                    price_type_currency_id = pricetype_obj.browse(cr, uid, price_type_id).currency_id.id
+                    amount_unit = self.pool.get('res.currency').compute(cr, uid, price_type_currency_id,
+                        context['currency_id'], product.standard_price, round=False, context=context)
                     new_std_price = ((amount_unit * product_avail[product.id])\
                         + (new_price * qty))/(product_avail[product.id] + qty)
 
@@ -2720,9 +2728,11 @@ class stock_move(osv.osv):
                 continue
             partial_data = partial_datas.get('move%s'%(move.id), False)
             assert partial_data, _('Missing partial picking data for move #%s.') % (move.id)
-            product_qty = partial_data.get('product_qty',0.0)
+            product_uom = partial_data.get('product_uom', False)
+            product_qty = partial_data.get('product_qty', 0.0)
+            product_qty = self.pool['product.uom']._compute_qty(cr, uid, product_uom, product_qty, move.product_uom.id)
             move_product_qty[move.id] = product_qty
-            product_uom = partial_data.get('product_uom',False)
+
             product_price = partial_data.get('product_price',0.0)
             product_currency = partial_data.get('product_currency',False)
             prodlot_ids[move.id] = partial_data.get('prodlot_id')
