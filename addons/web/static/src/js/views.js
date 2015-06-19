@@ -381,6 +381,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
             search_disable_custom_filters: action.context && action.context.search_disable_custom_filters
         });
         action.menu_id = options.action_menu_id;
+        action.context.params = _.extend({ 'action' : action.id }, action.context.params);
         if (!(type in this)) {
             console.error("Action manager can't handle action of type " + action.type, action);
             return $.Deferred().reject();
@@ -1163,7 +1164,7 @@ instance.web.Sidebar = instance.web.Widget.extend({
     init: function(parent) {
         var self = this;
         this._super(parent);
-        var view = this.getParent();
+        this.view = this.getParent();
         this.sections = [
             { 'name' : 'print', 'label' : _t('Print'), },
             { 'name' : 'other', 'label' : _t('More'), }
@@ -1657,7 +1658,7 @@ instance.web.json_node_to_xml = function(node, human_readable, indent) {
         cr = human_readable ? '\n' : '';
 
     if (typeof(node) === 'string') {
-        return sindent + node;
+        return sindent + node.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     } else if (typeof(node.tag) !== 'string' || !node.children instanceof Array || !node.attrs instanceof Object) {
         throw new Error(
             _.str.sprintf(_t("Node [%s] is not a JSONified XML node"),
