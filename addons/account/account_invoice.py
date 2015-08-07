@@ -1052,7 +1052,9 @@ class account_invoice(osv.osv):
                     i[2]['period_id'] = period_id
 
             ctx.update(invoice=inv)
-            move_id = move_obj.create(cr, uid, move, context=ctx)
+            ctx_copy = ctx.copy()
+            ctx_copy.pop('lang', None)
+            move_id = move_obj.create(cr, uid, move, context=ctx_copy)
             new_move_name = move_obj.browse(cr, uid, move_id, context=ctx).name
             # make the invoice point to that move
             self.write(cr, uid, [inv.id], {'move_id': move_id,'period_id':period_id, 'move_name':new_move_name}, context=ctx)
@@ -1482,10 +1484,11 @@ class account_invoice_line(osv.osv):
             raise osv.except_osv(_('No Partner Defined!'),_("You must first select a partner!") )
         if not product:
             if type in ('in_invoice', 'in_refund'):
-                return {'value': {}, 'domain':{'product_uom':[]}}
+                return {'value': {}, 'domain':{'uos_id':[]}}
             else:
-                return {'value': {'price_unit': 0.0}, 'domain':{'product_uom':[]}}
+                return {'value': {'price_unit': 0.0}, 'domain':{'uos_id':[]}}
         part = self.pool.get('res.partner').browse(cr, uid, partner_id, context=context)
+        product_uom_obj = self.pool.get('product.uom')
         fpos_obj = self.pool.get('account.fiscal.position')
         fpos = fposition_id and fpos_obj.browse(cr, uid, fposition_id, context=context) or False
 
@@ -1518,7 +1521,12 @@ class account_invoice_line(osv.osv):
             result.update({'price_unit': res.list_price, 'invoice_line_tax_id': tax_id})
         result['name'] = res.partner_ref
 
-        result['uos_id'] = uom_id or res.uom_id.id
+        result['uos_id'] = res.uom_id.id
+        if uom_id:
+            uom = product_uom_obj.browse(cr, uid, uom_id)
+            if res.uom_id.category_id.id == uom.category_id.id:
+                result['uos_id'] = uom_id
+
         if res.description:
             result['name'] += '\n'+res.description
 
