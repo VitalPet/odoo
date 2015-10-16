@@ -32,6 +32,7 @@ from openerp import SUPERUSER_ID, models
 from openerp import tools
 import openerp.exceptions
 from openerp.osv import fields, osv, expression
+from openerp.service.security import check_super
 from openerp.tools.translate import _
 from openerp.http import request
 
@@ -148,6 +149,7 @@ class res_users(osv.osv):
     }
     _name = "res.users"
     _description = 'Users'
+    _order = 'name, login'
 
     def _set_new_password(self, cr, uid, id, name, value, args, context=None):
         if value is False:
@@ -307,6 +309,24 @@ class res_users(osv.osv):
 
         return result
 
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False, lazy=True):
+        if uid != SUPERUSER_ID:
+            groupby_fields = set([groupby] if isinstance(groupby, basestring) else groupby)
+            if groupby_fields.intersection(USER_PRIVATE_FIELDS):
+                raise openerp.exceptions.AccessError('Invalid groupby')
+        return super(res_users, self).read_group(
+            cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby, lazy=lazy)
+
+    def _search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False, access_rights_uid=None):
+        if user != SUPERUSER_ID and args:
+            domain_terms = [term for term in args if isinstance(term, (tuple, list))]
+            domain_fields = set(left for (left, op, right) in domain_terms)
+            if domain_fields.intersection(USER_PRIVATE_FIELDS):
+                raise openerp.exceptions.AccessError('Invalid search criterion')
+        return super(res_users, self)._search(
+            cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count,
+            access_rights_uid=access_rights_uid)
+
     def create(self, cr, uid, vals, context=None):
         user_id = super(res_users, self).create(cr, uid, vals, context=context)
         user = self.browse(cr, uid, user_id, context=context)
@@ -407,10 +427,7 @@ class res_users(osv.osv):
         return dataobj.browse(cr, uid, data_id, context=context).res_id
 
     def check_super(self, passwd):
-        if passwd == tools.config['admin_passwd']:
-            return True
-        else:
-            raise openerp.exceptions.AccessDenied()
+        return check_super(passwd)
 
     def check_credentials(self, cr, uid, password):
         """ Override this method to plug additional authentication methods"""
