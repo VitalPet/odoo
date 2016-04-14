@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Odoo 8.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2015-05-29 13:24+0000\n"
+"PO-Revision-Date: 2016-04-04 22:40+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Bosnian (http://www.transifex.com/odoo/odoo-8/language/bs/)\n"
 "MIME-Version: 1.0\n"
@@ -235,7 +235,7 @@ msgstr "ID"
 #. module: website_forum_doc
 #: model:forum.documentation.stage,name:website_forum_doc.stage_ideas
 msgid "Ideas"
-msgstr ""
+msgstr "Ideje"
 
 #. module: website_forum_doc
 #: field:forum.documentation.toc,introduction:0
@@ -246,13 +246,13 @@ msgstr ""
 #: field:forum.documentation.stage,write_uid:0
 #: field:forum.documentation.toc,write_uid:0
 msgid "Last Updated by"
-msgstr ""
+msgstr "Zadnji ažurirao"
 
 #. module: website_forum_doc
 #: field:forum.documentation.stage,write_date:0
 #: field:forum.documentation.toc,write_date:0
 msgid "Last Updated on"
-msgstr ""
+msgstr "Zadnje ažurirano"
 
 #. module: website_forum_doc
 #: model:forum.documentation.toc,name:website_forum_doc.toc_crm_lead
@@ -374,7 +374,7 @@ msgstr "Pretraži"
 #: view:website:website_forum_doc.documentation
 #: view:website:website_forum_doc.documentation_post
 msgid "Search..."
-msgstr ""
+msgstr "Pretraži..."
 
 #. module: website_forum_doc
 #: field:forum.documentation.stage,sequence:0
@@ -430,17 +430,17 @@ msgstr "Web stranica"
 #. module: website_forum_doc
 #: field:forum.documentation.toc,website_meta_description:0
 msgid "Website meta description"
-msgstr ""
+msgstr "Website meta opis"
 
 #. module: website_forum_doc
 #: field:forum.documentation.toc,website_meta_keywords:0
 msgid "Website meta keywords"
-msgstr ""
+msgstr "Website meta ključne riječi"
 
 #. module: website_forum_doc
 #: field:forum.documentation.toc,website_meta_title:0
 msgid "Website meta title"
-msgstr ""
+msgstr "Website meta naslov"
 
 #. module: website_forum_doc
 #: view:website:website_forum_doc.promote_question

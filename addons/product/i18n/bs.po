@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo 8.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2015-07-29 08:39+0000\n"
+"PO-Revision-Date: 2016-04-04 22:46+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Bosnian (http://www.transifex.com/odoo/odoo-8/language/bs/)\n"
 "MIME-Version: 1.0\n"
@@ -893,7 +893,7 @@ msgstr "Veće od referentne jedinice mjere"
 #. module: product
 #: model:product.attribute.value,name:product.product_attribute_value_4
 msgid "Black"
-msgstr ""
+msgstr "Crna"
 
 #. module: product
 #: model:product.template,name:product.product_product_35_product_template
@@ -1174,7 +1174,7 @@ msgstr ""
 #: help:product.product,message_last_post:0
 #: help:product.template,message_last_post:0
 msgid "Date of the last message posted on the record."
-msgstr ""
+msgstr "Datum posljednje poruke ostavljene na unos."
 
 #. module: product
 #: model:product.uom,name:product.product_uom_day
@@ -1615,7 +1615,7 @@ msgstr "Interni"
 #. module: product
 #: field:product.template,categ_id:0
 msgid "Internal Category"
-msgstr ""
+msgstr "Interna kategorija"
 
 #. module: product
 #: field:product.product,code:0 field:product.product,default_code:0
@@ -1694,7 +1694,7 @@ msgstr ""
 #: field:product.product,message_last_post:0
 #: field:product.template,message_last_post:0
 msgid "Last Message Date"
-msgstr ""
+msgstr "Datum zadnje poruke"
 
 #. module: product
 #: field:pricelist.partnerinfo,write_uid:0 field:product.attribute,write_uid:0
@@ -1712,7 +1712,7 @@ msgstr ""
 #: field:product.template,write_uid:0 field:product.ul,write_uid:0
 #: field:product.uom,write_uid:0 field:product.uom.categ,write_uid:0
 msgid "Last Updated by"
-msgstr ""
+msgstr "Zadnji ažurirao"
 
 #. module: product
 #: field:pricelist.partnerinfo,write_date:0
@@ -1731,7 +1731,7 @@ msgstr ""
 #: field:product.template,write_date:0 field:product.ul,write_date:0
 #: field:product.uom,write_date:0 field:product.uom.categ,write_date:0
 msgid "Last Updated on"
-msgstr ""
+msgstr "Zadnje ažurirano"
 
 #. module: product
 #: help:product.pricelist.version,date_end:0

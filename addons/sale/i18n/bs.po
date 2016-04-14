@@ -9,9 +9,9 @@ msgstr ""
 "Project-Id-Version: Odoo 8.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-01-21 14:07+0000\n"
-"PO-Revision-Date: 2015-06-24 22:57+0000\n"
+"PO-Revision-Date: 2016-04-04 22:46+0000\n"
 "Last-Translator: Martin Trigaux\n"
-"Language-Team: Bosnian (http://www.transifex.com/p/odoo-8/language/bs/)\n"
+"Language-Team: Bosnian (http://www.transifex.com/odoo/odoo-8/language/bs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -410,12 +410,12 @@ msgstr "Prije odabira proizvoda, \n odaberite kupca u prodajnom formularu."
 #. module: sale
 #: model:ir.filters,name:sale.filter_isale_report_product
 msgid "By Product"
-msgstr ""
+msgstr "Po proizvodu"
 
 #. module: sale
 #: model:ir.filters,name:sale.filter_sale_report_salespersons
 msgid "By Salespersons"
-msgstr ""
+msgstr "Po prodavač(ici)"
 
 #. module: sale
 #: model:ir.filters,name:sale.filter_sale_report_salesteam
@@ -652,7 +652,7 @@ msgstr ""
 #. module: sale
 #: help:sale.order,message_last_post:0
 msgid "Date of the last message posted on the record."
-msgstr ""
+msgstr "Datum posljednje poruke ostavljene na unos."
 
 #. module: sale
 #: help:sale.order,date_confirm:0
@@ -1080,7 +1080,7 @@ msgstr "Znači da prodajna narudžba ima bar jedanu fakturu."
 #. module: sale
 #: field:sale.order,message_last_post:0
 msgid "Last Message Date"
-msgstr ""
+msgstr "Datum zadnje poruke"
 
 #. module: sale
 #: field:sale.advance.payment.inv,write_uid:0
@@ -1088,7 +1088,7 @@ msgstr ""
 #: field:sale.order.line,write_uid:0
 #: field:sale.order.line.make.invoice,write_uid:0
 msgid "Last Updated by"
-msgstr ""
+msgstr "Zadnji ažurirao"
 
 #. module: sale
 #: field:sale.advance.payment.inv,write_date:0
@@ -1096,7 +1096,7 @@ msgstr ""
 #: field:sale.order.line,write_date:0
 #: field:sale.order.line.make.invoice,write_date:0
 msgid "Last Updated on"
-msgstr ""
+msgstr "Zadnje ažurirano"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_sale_order_make_invoice
@@ -1277,7 +1277,7 @@ msgstr "Uslovi plaćanja"
 #. module: sale
 #: view:website:sale.report_saleorder_document
 msgid "Payment Term:"
-msgstr ""
+msgstr "Uslovi plaćanja:"
 
 #. module: sale
 #: field:sale.order,paypal_url:0
@@ -1504,7 +1504,7 @@ msgstr "Referenca na dokument koji je generisao ovu prodajnu narudžbu."
 #. module: sale
 #: field:sale.order,client_order_ref:0
 msgid "Reference/Description"
-msgstr ""
+msgstr "Referenca/Opis"
 
 #. module: sale
 #: view:crm.case.section:sale.crm_case_section_salesteams_view_kanban
@@ -1871,7 +1871,7 @@ msgstr "Nije definisan konto prihoda za proizvod: \"%s\" (id:%d)."
 #. module: sale
 #: view:sale.report:sale.view_order_product_search
 msgid "This Year"
-msgstr ""
+msgstr "Ove godine"
 
 #. module: sale
 #: help:sale.config.settings,module_sale_margin:0
@@ -1968,7 +1968,7 @@ msgstr "Ukupan uračunati porez"
 #. module: sale
 #: view:website:sale.report_saleorder_document
 msgid "Total Without Taxes"
-msgstr ""
+msgstr "Ukupno bez poreza"
 
 #. module: sale
 #: field:sale.config.settings,module_sale_stock:0
@@ -2080,7 +2080,7 @@ msgstr "Upozorenje!"
 #. module: sale
 #: field:sale.order,website_message_ids:0
 msgid "Website Messages"
-msgstr ""
+msgstr "Poruke na website-u"
 
 #. module: sale
 #: help:sale.order,website_message_ids:0

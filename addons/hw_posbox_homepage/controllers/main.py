@@ -44,7 +44,8 @@ index_template = """
         </p>
         <p>
         For more information on how to setup the Point of Sale with
-        the PosBox, please refer to <a href='/hw_proxy/static/doc/manual.pdf'>the manual</a>.
+        the PosBox, please refer to
+        <a href='https://www.odoo.com/documentation/user/point_of_sale/posbox/index.html'>the manual</a>.
         </p>
         <p>
         To see the status of the connected hardware, please refer 
@@ -54,7 +55,7 @@ index_template = """
         Wi-Fi can be configured by visiting the <a href='/wifi'>Wi-Fi configuration page</a>.
         </p>
         <p>
-        The PosBox software installed on this posbox is <b>version 13</b>,
+        The PosBox software installed on this posbox is <b>version 14</b>,
         the posbox version number is independent from Odoo. You can upgrade
         the software on the <a href='/hw_proxy/upgrade/'>upgrade page</a>.
         </p>

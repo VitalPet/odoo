@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:09+0000\n"
-"PO-Revision-Date: 2015-07-17 08:20+0000\n"
+"POT-Creation-Date: 2016-03-25 13:43+0000\n"
+"PO-Revision-Date: 2016-03-26 08:57+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Croatian (http://www.transifex.com/odoo/odoo-8/language/hr/)\n"
 "MIME-Version: 1.0\n"
@@ -42,21 +42,17 @@ msgid ""
 "       &nbsp;&nbsp;Your contact: <a href=\"mailto:${object.user_id.email or ''}?subject=Order%20${object.name}\">${object.user_id.name}</a>\n"
 "       % endif\n"
 "    </p>\n"
-"\n"
-"    <% set signup_url = object.get_signup_url() %>\n"
-"    % if signup_url:\n"
 "    <p>\n"
-"    You can access this document and pay online via our Customer Portal:\n"
+"        You can view your quotation online:\n"
 "    </p>\n"
-"        <a style=\"display:block; width: 150px; height:20px; margin-left: 120px; color: #DDD; font-family: 'Lucida Grande', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: bold; text-align: center; text-decoration: none !important; line-height: 1; padding: 5px 0px 0px 0px; background-color: #8E0000; border-radius: 5px 5px; background-repeat: repeat no-repeat;\"\n"
-"           href=\"${signup_url}\">View ${object.state in ('draft', 'sent') and 'Quotation' or 'Order'}</a>\n"
-"    % endif\n"
+"    <a style=\"display:block; width: 150px; height:20px; margin-left: 120px; color: #DDD; font-family: 'Lucida Grande', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: bold; text-align: center; text-decoration: none !important; line-height: 1; padding: 5px 0px 0px 0px; background-color: #8E0000; border-radius: 5px 5px; background-repeat: repeat no-repeat;\"\n"
+"        href=\"/quote/${object.id}/${object.access_token}\">View ${object.state in ('draft', 'sent') and 'Quotation' or 'Order'}</a>\n"
 "\n"
 "    % if object.paypal_url:\n"
 "    <br/>\n"
 "    <p>It is also possible to directly pay with Paypal:</p>\n"
 "        <a style=\"margin-left: 120px;\" href=\"${object.paypal_url}\">\n"
-"            <img class=\"oe_edi_paypal_button\" src=\"https://www.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif\"/>\n"
+"            <img class=\"oe_edi_paypal_button\" src=\"/sale/static/img/btn_paynowcc_lg.gif\"/>\n"
 "        </a>\n"
 "    % endif\n"
 "\n"
@@ -101,6 +97,11 @@ msgid ""
 msgstr ""
 
 #. module: website_quote
+#: view:website:website_quote.so_quotation
+msgid "! You can"
+msgstr ""
+
+#. module: website_quote
 #: model:email.template,report_name:website_quote.email_template_edi_sale
 msgid ""
 "${(object.name or '').replace('/','_')}_${object.state == 'draft' and "
@@ -112,19 +113,19 @@ msgstr "${(object.name or '').replace('/','_')}_${object.state == 'draft' and 'd
 msgid ""
 "${object.company_id.name|safe} ${object.state in ('draft', 'sent') and "
 "'Quotation' or 'Order'} (Ref ${object.name or 'n/a' })"
-msgstr ""
+msgstr "${object.company_id.name|safe} ${object.state in ('draft', 'sent') i 'Ponuda' or 'Narudžba'} (Ref ${object.name or 'n/a' })"
 
 #. module: website_quote
 #: view:website:website_quote.optional_products
 #: view:website:website_quote.pricing
 msgid "% discount"
-msgstr ""
+msgstr "% popusta"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 #: view:website:website_quote.so_template
 msgid "&times;"
-msgstr ""
+msgstr "&times;"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
@@ -139,7 +140,7 @@ msgid ""
 ":\n"
 "                                this content will appear on the quotation only if this\n"
 "                                product is put on the quote."
-msgstr ""
+msgstr ":\nsadržaj će se pojaviti na ponudi samo ako se\nproizvod koristi u ponudi."
 
 #. module: website_quote
 #: view:website:website_quote.so_template
@@ -147,7 +148,7 @@ msgid ""
 ":\n"
 "                                this content will appear on the quotation only if this\n"
 "                                product is used in the quote."
-msgstr ""
+msgstr ":\novaj sadržaj ća se pojaviti na svim ponudama samo ako se ovaj\nproizvod koristi u ponudi."
 
 #. module: website_quote
 #: model:sale.quote.template,website_description:website_quote.website_quote_template_1
@@ -467,7 +468,7 @@ msgid ""
 "                            <h2>Structure of the Training</h2>\n"
 "                        </div>\n"
 "                        <div class=\"col-md-5 col-md-offset-1 mt16 mb16\">\n"
-"                            <img class=\"img img-responsive\" src=\"https://www.openerp.com/saas_master/static/site_new/img/layout/online_training.png\">\n"
+"                            <img class=\"img img-responsive\" src=\"/website_quote/static/src/img/online_training.png\">\n"
 "                        </div>\n"
 "                        <div class=\"col-md-6 mt32\">\n"
 "                            <h4><strong>There are three components to the training</strong></h4>\n"
@@ -625,12 +626,12 @@ msgstr ""
 #. module: website_quote
 #: field:sale.order,amount_undiscounted:0
 msgid "Amount Before Discount"
-msgstr ""
+msgstr "Iznos prije popusta"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Ask Changes"
-msgstr ""
+msgstr "Zatraži promjene"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
@@ -678,7 +679,7 @@ msgstr "Vrijeme kreiranja"
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Customer:"
-msgstr ""
+msgstr "Kupac:"
 
 #. module: website_quote
 #: field:sale.order,website_description:0 field:sale.order.option,name:0
@@ -692,12 +693,12 @@ msgstr "Opis"
 #. module: website_quote
 #: field:product.template,quote_description:0
 msgid "Description for the quote"
-msgstr ""
+msgstr "Opis za ponudu"
 
 #. module: website_quote
 #: field:product.template,website_description:0
 msgid "Description for the website"
-msgstr ""
+msgstr "Opis za web stranicu"
 
 #. module: website_quote
 #: field:sale.order.option,discount:0 field:sale.quote.line,discount:0
@@ -713,7 +714,7 @@ msgstr ""
 #. module: website_quote
 #: view:sale.quote.template:website_quote.view_sale_quote_template_form
 msgid "Edit Template"
-msgstr ""
+msgstr "Uredi predložak"
 
 #. module: website_quote
 #: field:sale.order,validity_date:0
@@ -735,7 +736,7 @@ msgstr ""
 #: model:product.template,name:website_quote.product_template_quote_1
 #: model:sale.quote.line,name:website_quote.website_sale_order_line_1
 msgid "Functional Training"
-msgstr ""
+msgstr "Funkcionalni trening"
 
 #. module: website_quote
 #: view:website:website_quote.so_template
@@ -768,12 +769,12 @@ msgstr "ID"
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Incl. tax)"
-msgstr ""
+msgstr "Incl. tax)"
 
 #. module: website_quote
 #: view:website:website_quote.navigation_menu
 msgid "Introduction"
-msgstr ""
+msgstr "Uvod"
 
 #. module: website_quote
 #: field:sale.order.option,write_uid:0 field:sale.quote.line,write_uid:0
@@ -810,7 +811,7 @@ msgstr ""
 #: field:sale.order.option,website_description:0
 #: field:sale.quote.line,website_description:0
 msgid "Line Description"
-msgstr ""
+msgstr "Opis retka"
 
 #. module: website_quote
 #: view:sale.quote.template:website_quote.view_sale_quote_template_form
@@ -825,12 +826,12 @@ msgstr ""
 #. module: website_quote
 #: field:sale.quote.option,website_description:0
 msgid "Option Description"
-msgstr ""
+msgstr "Opis opcija"
 
 #. module: website_quote
 #: view:website:website_quote.so_template
 msgid "Optional Product:"
-msgstr ""
+msgstr "Mogući proizvod"
 
 #. module: website_quote
 #: view:sale.order:website_quote.sale_order_form_quote
@@ -852,7 +853,7 @@ msgstr "Opcije"
 #: code:addons/website_quote/controllers/main.py:69
 #, python-format
 msgid "Order signed by %s"
-msgstr ""
+msgstr "Narudžbu potpisao %s"
 
 #. module: website_quote
 #: view:website:website_quote.optional_products
@@ -863,7 +864,7 @@ msgstr "Cijena"
 #. module: website_quote
 #: view:website:website_quote.pricing
 msgid "Pricing"
-msgstr ""
+msgstr "Cijene"
 
 #. module: website_quote
 #: field:sale.order.option,product_id:0 field:sale.quote.line,product_id:0
@@ -879,7 +880,7 @@ msgstr "Predložak proizvoda"
 #. module: website_quote
 #: view:website:website_quote.so_template
 msgid "Product:"
-msgstr ""
+msgstr "Proizvod:"
 
 #. module: website_quote
 #: view:website:website_quote.optional_products
@@ -896,34 +897,34 @@ msgstr "Količina"
 #. module: website_quote
 #: field:sale.quote.template,name:0
 msgid "Quotation Template"
-msgstr ""
+msgstr "Predložak ponude"
 
 #. module: website_quote
 #: model:ir.model,name:website_quote.model_sale_quote_line
 msgid "Quotation Template Lines"
-msgstr ""
+msgstr "Reci predloška ponude"
 
 #. module: website_quote
 #: field:sale.quote.line,quote_id:0 field:sale.quote.option,template_id:0
 msgid "Quotation Template Reference"
-msgstr ""
+msgstr "Referenca predloška ponude"
 
 #. module: website_quote
 #: model:ir.actions.act_window,name:website_quote.action_sale_quotation_template
 #: model:ir.ui.menu,name:website_quote.menu_sale_quote_template
 msgid "Quotation Templates"
-msgstr ""
+msgstr "Predlošci ponude"
 
 #. module: website_quote
 #: code:addons/website_quote/controllers/main.py:47
 #, python-format
 msgid "Quotation viewed by customer"
-msgstr ""
+msgstr "Ponuda pregledana od strane kupca"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Quote Date:"
-msgstr ""
+msgstr "Datum ponude"
 
 #. module: website_quote
 #: field:sale.quote.template,number_of_days:0
@@ -949,28 +950,28 @@ msgstr ""
 #: view:website:website_quote.quotation_toolbar
 #: view:website:website_quote.so_quotation
 msgid "Reject"
-msgstr ""
+msgstr "Odbijeno"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Reject This Quote"
-msgstr ""
+msgstr "Odbij ovu ponudu"
 
 #. module: website_quote
 #: model:ir.model,name:website_quote.model_sale_order_option
 msgid "Sale Options"
-msgstr ""
+msgstr "Opcija prodaje"
 
 #. module: website_quote
 #: field:sale.order.option,order_id:0
 msgid "Sale Order Reference"
-msgstr ""
+msgstr "Broj prodajnog naloga"
 
 #. module: website_quote
 #: model:ir.model,name:website_quote.model_sale_quote_template
 #: view:sale.quote.template:website_quote.view_sale_quote_template_form
 msgid "Sale Quotation Template"
-msgstr ""
+msgstr "Predložak prodajne ponude"
 
 #. module: website_quote
 #: view:sale.quote.template:website_quote.view_sale_quote_template_tree
@@ -996,7 +997,7 @@ msgstr ""
 #. module: website_quote
 #: field:sale.order,access_token:0
 msgid "Security Token"
-msgstr ""
+msgstr "Sigurnosni token"
 
 #. module: website_quote
 #: view:website:website_quote.chatter
@@ -1011,7 +1012,7 @@ msgstr ""
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Ship To:"
-msgstr ""
+msgstr "Pošalji:"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
@@ -1027,7 +1028,7 @@ msgstr "Međuzbroj:"
 #: view:sale.order:website_quote.sale_order_form_quote
 #: view:sale.quote.template:website_quote.view_sale_quote_template_form
 msgid "Suggested Products"
-msgstr ""
+msgstr "Predloženi proizvodi"
 
 #. module: website_quote
 #: view:website:website_quote.pricing
@@ -1051,7 +1052,7 @@ msgstr "Tehnička obuka"
 msgid ""
 "Tell us why you are refusing this quotation, this will help us improve our "
 "services."
-msgstr ""
+msgstr "Recite nam zašto ste odbili ponudu, to će nam pomoći da poboljšamo naše usluge."
 
 #. module: website_quote
 #: view:website:website_quote.so_template
@@ -1085,10 +1086,15 @@ msgstr ""
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
+msgid "This order has already been"
+msgstr ""
+
+#. module: website_quote
+#: view:website:website_quote.so_quotation
 msgid ""
 "This order has been validated. Thanks for your trust\n"
 "                          and do not hesitate to"
-msgstr ""
+msgstr "Narudžba je potvrđena. Hvala na povjerenju\ni ne ustručavajte se"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
@@ -1098,7 +1104,7 @@ msgstr ""
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "This quotation has been rejected."
-msgstr ""
+msgstr "Ponuda je odbijena."
 
 #. module: website_quote
 #: view:website:website_quote.so_template
@@ -1130,7 +1136,7 @@ msgstr ""
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Validate Order"
-msgstr ""
+msgstr "Provjeri valjanost narudžbe"
 
 #. module: website_quote
 #: view:sale.order:website_quote.sale_order_form_quote
@@ -1140,47 +1146,53 @@ msgstr ""
 #. module: website_quote
 #: view:sale.quote.template:website_quote.view_sale_quote_template_form
 msgid "Website Description"
+msgstr "Opis web stranice"
+
+#. module: website_quote
+#: code:addons/website_quote/controllers/main.py:148
+#, python-format
+msgid "You cannot add options to a confirmed order."
 msgstr ""
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your Contact:"
-msgstr ""
+msgstr "Vaš kontakt:"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your Name:"
-msgstr ""
+msgstr "Vaše ime:"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your Order"
-msgstr ""
+msgstr "Vaša narudžba"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your Quotation"
-msgstr ""
+msgstr "Vaša ponuda"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your Reference:"
-msgstr ""
+msgstr "Vaša oznaka:"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your advantage:"
-msgstr ""
+msgstr "Vaše prednosti:"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your feedback....."
-msgstr ""
+msgstr "Vaša povratna informacija...."
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "Your message has been successfully sent!"
-msgstr ""
+msgstr "Vaša poruka je uspješno poslana!"
 
 #. module: website_quote
 #: view:website:website_quote.so_template
@@ -1189,13 +1201,18 @@ msgstr "i"
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
-msgid "contact us"
+msgid "cancelled"
 msgstr ""
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
+msgid "contact us"
+msgstr "kontaktirajte nas"
+
+#. module: website_quote
+#: view:website:website_quote.so_quotation
 msgid "day"
-msgstr ""
+msgstr "dan"
 
 #. module: website_quote
 #: view:sale.quote.template:website_quote.view_sale_quote_template_form
@@ -1208,12 +1225,12 @@ msgstr "dana"
 msgid ""
 "for\n"
 "                          any question."
-msgstr ""
+msgstr "za\nbilo koje pitanje."
 
 #. module: website_quote
 #: view:website:website_quote.so_quotation
 msgid "if you want a new one."
-msgstr ""
+msgstr "ako želite novi."
 
 #. module: website_quote
 #: view:website:website_quote.chatter
@@ -1237,6 +1254,11 @@ msgstr ""
 #: field:sale.order.option,line_id:0
 msgid "unknown"
 msgstr "nepoznato"
+
+#. module: website_quote
+#: view:website:website_quote.so_quotation
+msgid "validated"
+msgstr ""
 
 #. module: website_quote
 #: view:website:website_quote.so_template

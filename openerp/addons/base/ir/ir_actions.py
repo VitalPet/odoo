@@ -26,6 +26,7 @@ import os
 import time
 import datetime
 import dateutil
+import pytz
 
 import openerp
 from openerp import SUPERUSER_ID
@@ -944,6 +945,9 @@ class ir_actions_server(osv.osv):
             'time': time,
             'datetime': datetime,
             'dateutil': dateutil,
+            # NOTE: only `timezone` function. Do not provide the whole `pytz` module as users
+            #       will have access to `pytz.os` and `pytz.sys` to do nasty things...
+            'timezone': pytz.timezone,
             # orm
             'env': env,
             'model': model,
@@ -1083,6 +1087,19 @@ Launch Manually Once: after having been launched manually, it sets automatically
         'type': 'manual',
     }
     _order="sequence,id"
+
+    @openerp.api.multi
+    def unlink(self):
+        if self:
+            try:
+                todo_open_menu = self.env.ref('base.open_menu')
+                # don't remove base.open_menu todo but set its original action
+                if todo_open_menu in self:
+                    todo_open_menu.action_id = self.env.ref('base.action_client_base_menu').id
+                    self -= todo_open_menu
+            except ValueError:
+                pass
+        return super(ir_actions_todo, self).unlink()
 
     def name_get(self, cr, uid, ids, context=None):
         return [(rec.id, rec.action_id.name) for rec in self.browse(cr, uid, ids, context=context)]
